@@ -1,10 +1,13 @@
-version: '3'
+version: '3.5'
 
 services:
   traefik:
     image: traefik:1.7
     ports:
-      - "80:80"
+      - target: 80
+        published: 80
+        protocol: tcp
+        mode: ingress
       - "8082:8080"
     volumes:
       - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml:ro
@@ -28,7 +31,6 @@ services:
 
   adminer:
     image: adminer
-    restart: always
     depends_on:
       - database1
       - traefik
@@ -40,7 +42,7 @@ services:
         traefik.port: 8081
 
   web:
-    build: web
+    image: gabrielv/avizier-virtual:local
     environment:
       - DJANGO_SETTINGS_MODULE=website.settings
     volumes:
@@ -84,11 +86,11 @@ services:
 
 networks:
   database1_network:
-    driver: bridge
+    driver: overlay
   nginx_network:
-    driver: bridge
+    driver: overlay
   traefik_network:
-    driver: bridge
+    driver: overlay
 
 volumes:
   database1_volume:

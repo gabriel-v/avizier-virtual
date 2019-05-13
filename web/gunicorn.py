@@ -1,4 +1,4 @@
-name = 'hello'
+name = 'avizier-virtual'
 loglevel = 'info'
 errorlog = '-'
 accesslog = '-'

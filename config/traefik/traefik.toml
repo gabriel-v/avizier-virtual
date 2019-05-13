@@ -1,7 +1,15 @@
+defaultEntryPoints = ["http"]
+logLevel = "INFO"
+
+[traefikLog]
+filePath = "/dev/stdout"
+
+[accessLog]
+filePath = "/dev/stdout"
+
 [api]
 readOnly = true
 
-defaultEntryPoints = ["http"]
 [entryPoints]
   [entryPoints.http]
     address = ":80"
