@@ -1,0 +1,96 @@
+version: '3'
+
+services:
+  traefik:
+    image: traefik:1.7
+    ports:
+      - "80:80"
+      - "8082:8080"
+    volumes:
+      - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml:ro
+      - /var/run/docker.sock:/var/run/docker.sock
+    networks:
+      - traefik_network
+    deploy:
+      labels:
+        traefik.frontend.rule: "PathPrefixStrip:/admin/traefik/"
+        traefik.port: 8082
+
+
+  database1:
+    image: postgres:10
+    volumes:
+      - database1_volume:/var/lib/postgresql/data
+    env_file:
+      - config/db/database1.env
+    networks:
+      - database1_network
+
+  adminer:
+    image: adminer
+    restart: always
+    depends_on:
+      - database1
+      - traefik
+    ports:
+      - 8081:8080
+    deploy:
+      labels:
+        traefik.frontend.rule: "PathPrefixStrip:/admin/adminer"
+        traefik.port: 8081
+
+  web:
+    build: web
+    environment:
+      - DJANGO_SETTINGS_MODULE=website.settings
+    volumes:
+      - ./web:/opt/services/djangoapp/src
+      - static:/opt/services/djangoapp/static
+      - media:/opt/services/djangoapp/media
+    env_file:
+      - config/db/database1.env
+    networks:
+      - database1_network
+      - nginx_network
+      - traefik_network
+    depends_on:
+      - database1
+      - traefik
+    ports:
+      - 8000:8000
+    deploy:
+      labels:
+        traefik.frontend.rule: "PathPrefix:/admin"
+        traefik.port: 8000
+
+  nginx:
+    image: nginx:1.13
+    ports:
+      - 8085:80
+    volumes:
+      - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
+      - static:/opt/services/djangoapp/static
+      - media:/opt/services/djangoapp/media
+    networks:
+      - nginx_network
+      - traefik_network
+    depends_on:
+      - web
+      - traefik
+    deploy:
+      labels:
+        traefik.frontend.rule: "PathPrefix:/"
+        traefik.port: 8085
+
+networks:
+  database1_network:
+    driver: bridge
+  nginx_network:
+    driver: bridge
+  traefik_network:
+    driver: bridge
+
+volumes:
+  database1_volume:
+  static:
+  media:

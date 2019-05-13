@@ -1,0 +1,13 @@
+[api]
+readOnly = true
+
+defaultEntryPoints = ["http"]
+[entryPoints]
+  [entryPoints.http]
+    address = ":80"
+
+[docker]
+swarmMode = true
+watch = true
+domain = "docker"
+network = "traefik_network"
