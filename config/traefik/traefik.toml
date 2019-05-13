@@ -18,4 +18,4 @@ readOnly = true
 swarmMode = true
 watch = true
 domain = "docker"
-network = "traefik_network"
+network = "avizier_traefik_network"

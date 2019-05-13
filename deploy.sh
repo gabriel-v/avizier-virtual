@@ -31,5 +31,5 @@ if ! ip link show $bridge_name; then
 fi
 
 docker stack deploy -c docker-compose.yml avizier
-sleep 1
+until docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python --version; do sleep 1; done
 docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python ./manage.py migrate
