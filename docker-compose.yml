@@ -1,26 +1,6 @@
 version: '3.5'
 
 services:
-  traefik:
-    image: traefik:1.7
-    ports:
-      - target: 80
-        published: 80
-        protocol: tcp
-        mode: ingress
-    volumes:
-      - ./config/traefik/traefik.toml:/etc/traefik/traefik.toml:ro
-      - type: bind
-        source: /var/run/docker.sock
-        target: /var/run/docker.sock
-    networks:
-      - traefik_network
-    deploy:
-      labels:
-        traefik.frontend.rule: "PathPrefixStrip:/admin/traefik"
-        traefik.port: 8080
-
-
   database1:
     image: postgres:10
     volumes:
@@ -28,68 +8,40 @@ services:
     env_file:
       - config/db/database1.env
     networks:
-      - database1_network
-
-  adminer:
-    image: adminer
-    depends_on:
-      - database1
-      - traefik
-    networks:
-      - traefik_network
-    deploy:
-      labels:
-        traefik.frontend.rule: "PathPrefixStrip:/admin/adminer"
-        traefik.port: 8080
+      - net
 
   web:
     image: gabrielv/avizier-virtual:local
     environment:
       - DJANGO_SETTINGS_MODULE=website.settings
     volumes:
-      - ./web:/opt/services/djangoapp/src
-      - static:/opt/services/djangoapp/static
-      - media:/opt/services/djangoapp/media
+      - ./web:/web:ro
+      - ./volumes/static:/static
+      - media:/media
     env_file:
       - config/db/database1.env
     networks:
-      - database1_network
-      - nginx_network
-      - traefik_network
+      - net
     depends_on:
       - database1
-      - traefik
-    deploy:
-      labels:
-        traefik.frontend.rule: "PathPrefix:/admin/django,/"
-        traefik.port: 8000
 
   nginx:
     image: nginx:1.13
+    ports:
+      - 80:80
     volumes:
       - ./config/nginx/conf.d:/etc/nginx/conf.d:ro
-      - static:/opt/services/djangoapp/static
-      - media:/opt/services/djangoapp/media
+      - ./volumes/static:/opt/services/djangoapp/static:ro
+      - media:/opt/services/djangoapp/media:ro
     networks:
-      - nginx_network
-      - traefik_network
+      - net
     depends_on:
       - web
-      - traefik
-    deploy:
-      labels:
-        traefik.frontend.rule: "PathPrefix:/static,/media"
-        traefik.port: 80
 
 networks:
-  database1_network:
-    driver: overlay
-  nginx_network:
-    driver: overlay
-  traefik_network:
+  net:
     driver: overlay
 
 volumes:
   database1_volume:
-  static:
   media:

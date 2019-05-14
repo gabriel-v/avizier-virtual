@@ -7,7 +7,7 @@ public_address=$(ip route get 8.8.8.8 | awk '{ print $7; exit }')
 if [ ! -z "$RESET" ]; then
   docker swarm leave --force || true
   sudo ip link del $bridge_name || true
-  sudo iptables -t nat -D PREROUTING -d $public_address -p tcp --dport 80  -j DNAT --to-destination $bridge_address
+  #sudo iptables -t nat -D PREROUTING -d $public_address -p tcp --dport 80  -j DNAT --to-destination $bridge_address
   sleep 1
 fi
 
@@ -30,6 +30,8 @@ if ! ip link show $bridge_name; then
   echo "Docker swarm set up successfully."
 fi
 
-docker stack deploy -c docker-compose.yml avizier
+mkdir -p volumes/static || true
+docker stack deploy --prune -c docker-compose.yml avizier
 until docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python --version; do sleep 1; done
-docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python ./manage.py migrate
+docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python ./manage.py collectstatic --noinput
+docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python ./manage.py migrate --noinput
