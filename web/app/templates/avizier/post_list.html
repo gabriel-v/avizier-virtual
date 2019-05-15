@@ -9,6 +9,9 @@
 			</div>
 			<h1><a href="{% url 'post_detail' pk=post.pk %}">{{ post.title }}</a></h1>
 			<p>{{ post.text|linebreaks }}</p>
+                        {% if post.image_url %}
+                                <img src="{{ post.image_url }}" width="30%"></img>
+                        {% endif %}
 		</div>	
 	{% endfor %}
 {% endblock %}
