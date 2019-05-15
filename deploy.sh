@@ -9,6 +9,7 @@ if [ ! -z "$RESET" ]; then
   sleep 1
 fi
 
+ls secrets.env || cp example-secrets.env secrets.env
 mkdir -p volumes/static || true
 docker stack deploy --prune -c docker-compose.yml avizier
 until docker exec $(docker ps -q --filter label=com.docker.swarm.service.name=avizier_web) python --version; do sleep 1; done
