@@ -6,7 +6,7 @@ import os
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.getenv(
-    'SECRET_KEY',
+    'DJANGO_SECRET_KEY',
     ''.join(random.choice(string.ascii_letters) for _ in range(100)),
 )
 

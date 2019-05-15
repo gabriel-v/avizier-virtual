@@ -20,6 +20,7 @@ services:
       - ./volumes/static:/static
       - media:/media
     env_file:
+      - secrets.env
       - config/db/database1.env
     networks:
       - net
