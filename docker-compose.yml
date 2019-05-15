@@ -14,8 +14,9 @@ services:
     image: gabrielv/avizier-virtual:local
     environment:
       - DJANGO_SETTINGS_MODULE=website.settings
+      - DJANGO_DEBUG=on
     volumes:
-      - ./web:/web:ro
+      - ./web:/web
       - ./volumes/static:/static
       - media:/media
     env_file:
