@@ -11,7 +11,7 @@ services:
       - net
 
   web:
-    image: gabrielv/avizier-virtual:local
+    image: gabrielv/avizier-virtual:latest
     environment:
       - DJANGO_SETTINGS_MODULE=website.settings
       - DJANGO_DEBUG=on
